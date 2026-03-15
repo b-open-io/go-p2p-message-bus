@@ -5,6 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/libp2p/go-libp2p/core/host"
+	"github.com/libp2p/go-libp2p/core/network"
 	"github.com/libp2p/go-libp2p/core/peer"
 )
 
@@ -26,6 +28,17 @@ type Client interface {
 	// Connect connects to a peer using a multiaddr string (e.g. "/dns/localhost/tcp/9905/p2p/12D3KooW...").
 	// This is useful for connecting to static peers that are known ahead of time.
 	Connect(ctx context.Context, peerMultiaddr string) error
+
+	// SetStreamHandler registers a handler for a direct peer-to-peer stream protocol.
+	// Other peers can open streams to this protocol ID for request/response communication.
+	SetStreamHandler(protocolID string, handler network.StreamHandler)
+
+	// NewStream opens a direct stream to a specific peer for request/response communication.
+	// The peerID should be a string-encoded libp2p peer ID.
+	NewStream(ctx context.Context, peerID string, protocolID string) (network.Stream, error)
+
+	// Host returns the underlying libp2p host for advanced usage.
+	Host() host.Host
 
 	// Close shuts down the client and releases all resources.
 	Close() error

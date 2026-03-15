@@ -710,6 +710,25 @@ func (c *client) Connect(ctx context.Context, peerMultiaddr string) error {
 	return nil
 }
 
+// SetStreamHandler registers a handler for a direct peer-to-peer stream protocol.
+func (c *client) SetStreamHandler(protocolID string, handler network.StreamHandler) {
+	c.host.SetStreamHandler(protocol.ID(protocolID), handler)
+}
+
+// NewStream opens a direct stream to a specific peer.
+func (c *client) NewStream(ctx context.Context, peerID string, protocolID string) (network.Stream, error) {
+	pid, err := peer.Decode(peerID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid peer ID %s: %w", peerID, err)
+	}
+	return c.host.NewStream(ctx, pid, protocol.ID(protocolID))
+}
+
+// Host returns the underlying libp2p host.
+func (c *client) Host() host.Host {
+	return c.host
+}
+
 // Internal methods
 
 //nolint:gocyclo // DHT advertising logic complexity is reasonable
